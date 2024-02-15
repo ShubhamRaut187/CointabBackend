@@ -13,35 +13,47 @@ PostRoutes.get('/:UserId',(req,res)=>{
             return;
         }
 
-        if(results.length === 0){
-            res.status(404).send({'Message':'No posts found'});
-            return;
-        }
+        // if(results.length === 0){
+        //     res.status(404).send({'Message':'No posts found'});
+        //     return;
+        // }
 
         res.status(200).json({'Posts':results});
 
     })
 });
 
-PostRoutes.post('/create/:UserId',(req,res)=>{
+PostRoutes.post('/create/:UserId',async(req,res)=>{
     const {UserId} = req.params;
     const bulk_data = req.body;
     const query = 'INSERT INTO posts SET ?';
-
-    for(let i = 0;i<bulk_data.length;i++){
-        const data = bulk_data[i];
-
-        pool.query(query,UserId,(error,results)=>{
-            if(error){
-                console.log('Error while saving posts of user',error);
-                res.status(500).send({'Message':'Error while saving post of user'});
-                return;
-            }
-
-        })
+    // console.log(bulk_data);
+    try {
+        for(let i = 0;i<bulk_data.length;i++){
+            const data = bulk_data[i];
+    
+            await new Promise((resolve,rejected)=>{
+                pool.query(query,data,(error,results)=>{
+                    if(error){
+                        console.log('Error while saving posts of user',error);
+                        res.status(500).send({'Message':'Error while saving post of user'});
+                        rejected(error);
+                        return;
+                    }
+                    else{
+                        resolve();
+                    }
+        
+                })
+            })
+        }
+        res.status(200).send({'Message':'Posts saved successfully'});
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({ 'Message': 'Error while saving post of user' });
     }
 
-    res.status(200).send({'Message':'Posts saved successfully'});
+    
 
 })
 

@@ -21,6 +21,6 @@ app.use('/users',UserRoutes);
 app.use('/posts',PostRoutes);
 
 // Server Connection on port 8000
-app.listen(8000,()=>{
+app.listen(process.env.PORT,()=>{
     console.log('Server running on port 8000');
 })
